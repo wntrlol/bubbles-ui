@@ -1,0 +1,284 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---- Canvas & elevation ------------------------------------------- */
+  --color-canvas: #04120b;
+  --color-dim: #050505;
+  --color-bright: #1d1728;
+  --color-surface-lowest: #0a0a0a;
+  --color-surface-low: #131829;
+  --color-surface: #1c243c;
+  --color-surface-high: #251e32;
+  --color-surface-highest: #302741;
+
+  /* ---- Accents ------------------------------------------------------- */
+  --color-primary: #95ff50;
+  --color-primary-hover: #c9ffab;
+  --color-on-primary: #000000;
+  --color-secondary: #7a6bae;
+  --color-secondary-container: #5a4e8c;
+  --color-muted: #756790;
+  --color-badge-4k: #3f8a1d;
+
+  /* ---- Structure ----------------------------------------------------- */
+  --color-outline: rgba(255, 255, 255, 0.1);
+  --color-outline-strong: rgba(255, 255, 255, 0.2);
+  --container-page: 1280px;
+
+  /* ---- Type ---------------------------------------------------------- */
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Motion -------------------------------------------------------- */
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-drift: drift 24s ease-in-out infinite alternate;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes drift {
+  from { transform: translate3d(-4%, -2%, 0) scale(1); }
+  to   { transform: translate3d(4%, 3%, 0) scale(1.15); }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translate3d(0, 22px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes hero-fade-in {
+  from { opacity: 0; transform: scale(1.04); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes liquid {
+  0%   { transform: translate3d(-8%, -6%, 0) rotate(0deg) scale(1.05); }
+  33%  { transform: translate3d(6%, 4%, 0) rotate(120deg) scale(1.25); }
+  66%  { transform: translate3d(-4%, 8%, 0) rotate(240deg) scale(1.1); }
+  100% { transform: translate3d(-8%, -6%, 0) rotate(360deg) scale(1.05); }
+}
+
+/* ---- Ambient canvas -------------------------------------------------- */
+/* Hue is written at runtime by useAmbient(); the fields interpolate to it. */
+:root { --ambient-hue: 150; }
+
+.ambient-field {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  will-change: transform;
+  transition: background 900ms ease-out;
+}
+
+.ambient-field-a {
+  inset-block-start: -30%;
+  inset-inline-start: -20%;
+  block-size: 72vmax;
+  inline-size: 72vmax;
+  opacity: 0.42;
+  background: radial-gradient(
+    circle at 35% 35%,
+    hsl(var(--ambient-hue) 72% 46% / 0.42),
+    transparent 62%
+  );
+  animation: drift 26s ease-in-out infinite alternate;
+}
+
+.ambient-field-b {
+  inset-block-start: 6%;
+  inset-inline-end: -26%;
+  block-size: 62vmax;
+  inline-size: 62vmax;
+  opacity: 0.4;
+  background: radial-gradient(
+    circle at 60% 40%,
+    hsl(calc(var(--ambient-hue) + 48) 46% 42% / 0.40),
+    transparent 64%
+  );
+  animation: drift 32s ease-in-out -9s infinite alternate;
+}
+
+.ambient-field-c {
+  inset-block-end: -32%;
+  inset-inline-start: 14%;
+  block-size: 66vmax;
+  inline-size: 66vmax;
+  opacity: 0.34;
+  background: radial-gradient(
+    circle at 50% 50%,
+    hsl(calc(var(--ambient-hue) - 34) 40% 34% / 0.38),
+    transparent 66%
+  );
+  animation: drift 38s ease-in-out -18s infinite alternate;
+}
+
+.ambient-grain,
+.liquid-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Settings liquid canvas ------------------------------------------ */
+/* The settings surface gets its own treatment: slower, denser, brand-hued. */
+.liquid-field {
+  position: absolute;
+  border-radius: 45%;
+  filter: blur(90px);
+  will-change: transform;
+  mix-blend-mode: screen;
+}
+
+/* ---- Typography scale ------------------------------------------------ */
+@utility text-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5.2vw, 3.75rem);
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+@utility text-headline-lg {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+@utility text-headline-md {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  line-height: 1.28;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+@utility text-title-lg {
+  font-size: 1.25rem; line-height: 1.4; font-weight: 600;
+}
+@utility text-body-lg {
+  font-size: 1.125rem; line-height: 1.55; font-weight: 400; letter-spacing: 0.01em;
+}
+@utility text-body-md {
+  font-size: 1rem; line-height: 1.5; font-weight: 400;
+}
+@utility text-label-md {
+  font-size: 0.875rem; line-height: 1.42; font-weight: 600; letter-spacing: 0.01em;
+}
+@utility text-label-sm {
+  font-size: 0.75rem; line-height: 1.33; font-weight: 500; letter-spacing: 0.02em;
+}
+
+/* ---- Elevation surfaces ---------------------------------------------- */
+@utility glass {
+  background: rgba(29, 23, 40, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-outline);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+@utility glass-modal {
+  background: rgba(10, 10, 10, 0.9);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--color-outline-strong);
+}
+@utility glow-primary {
+  box-shadow: 0 8px 24px rgba(149, 255, 80, 0.15);
+}
+
+/* ---- Staggered reveal -------------------------------------------------- */
+/*
+ * Children rest visible. The keyframe only runs backwards into view once the
+ * observer marks the container, so a stalled or absent observer degrades to
+ * "shown without motion" rather than an invisible catalog.
+ */
+[data-reveal="shown"] > * {
+  animation: reveal-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--reveal-index, 0) * 45ms);
+}
+
+/* Backdrop settles to visible, so a dropped frame never blanks the billboard. */
+.hero-fade {
+  animation: hero-fade-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* ---- Rails ------------------------------------------------------------ */
+@utility rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+@utility rail-hide {
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* ---- Base ------------------------------------------------------------- */
+:root { color-scheme: dark; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--color-canvas);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--color-primary); color: var(--color-on-primary); }
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Poster plates carry their own contrast; keep images from flashing white. */
+img { background-color: transparent; }
+
+/* Kill the 300ms tap delay and the default blue flash on every control. */
+a,
+button,
+input,
+select,
+textarea,
+label,
+[role="button"],
+[role="tab"],
+[role="switch"],
+[role="radio"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Headings wrap on sense rather than leaving a single orphaned word. */
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+
+/* Anchored sections clear the floating nav when jumped to. */
+[id] { scroll-margin-top: 6rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Settings > Appearance > Reduce motion, applied to the document root. */
+[data-reduce-motion="true"] { scroll-behavior: auto; }
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
