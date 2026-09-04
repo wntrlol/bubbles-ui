@@ -1,0 +1,41 @@
+"use client";
+
+import { useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll, useReducedMotion } from "motion/react";
+import { ArrowUp } from "lucide-react";
+
+/**
+ * Appears once the viewer is deep enough that the nav is a long way back.
+ * Driven by Motion's scroll observer rather than a scroll listener, so it
+ * costs nothing per frame.
+ */
+export default function ScrollToTop() {
+  const { scrollY } = useScroll();
+  const [visible, setVisible] = useState(false);
+  const reduce = useReducedMotion();
+
+  useMotionValueEvent(scrollY, "change", (value) => {
+    setVisible(value > 900);
+  });
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          type="button"
+          onClick={() =>
+            window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" })
+          }
+          aria-label="Back to top"
+          initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.6, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.6, y: 12 }}
+          transition={{ type: "spring", stiffness: 420, damping: 30 }}
+          className="fixed bottom-6 right-6 z-40 grid size-12 place-items-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-[20px] shadow-lg transition-[background-color,color,border-color,transform] duration-200 hover:border-white hover:bg-white hover:text-black active:scale-95"
+        >
+          <ArrowUp className="size-5" />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
