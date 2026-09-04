@@ -126,7 +126,7 @@ function NoServerConfigured() {
         </span>
         <h2 className="mt-4 text-title-lg text-white">No playback server configured</h2>
         <p className="mt-2 text-body-md text-muted">
-          Nexa ships with no sources. Register your own licensed endpoints in
+          Zenox ships with no sources. Register your own licensed endpoints in
           <code className="mx-1 rounded bg-white/8 px-1.5 py-0.5 text-label-sm text-white/80">
             STREAM_PROVIDERS
           </code>

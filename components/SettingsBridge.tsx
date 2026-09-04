@@ -10,7 +10,7 @@ import { accentById, useSettingsStore } from "@/lib/store/useSettingsStore";
  */
 export default function SettingsBridge() {
   const accent = useSettingsStore((s) => s.accent);
-  const reduceMotion = useSettingsStore((s) => s.reduceMotion);
+  const motion = useSettingsStore((s) => s.motion);
 
   useEffect(() => {
     const { base, hover } = accentById(accent);
@@ -20,8 +20,9 @@ export default function SettingsBridge() {
   }, [accent]);
 
   useEffect(() => {
-    document.documentElement.dataset.reduceMotion = String(reduceMotion);
-  }, [reduceMotion]);
+    // CSS keys off this to override the OS preference in either direction.
+    document.documentElement.dataset.motion = motion;
+  }, [motion]);
 
   return null;
 }

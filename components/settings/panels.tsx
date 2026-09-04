@@ -19,6 +19,7 @@ import {
   SUBTITLE_LANGUAGES,
   useSettingsStore,
   type AccentId,
+  type MotionPreference,
 } from "@/lib/store/useSettingsStore";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,12 @@ const TITLE_MODES: SegmentOption<"hover" | "always">[] = [
 const EPISODE_VIEWS: SegmentOption<"carousel" | "grid">[] = [
   { value: "carousel", label: "Carousel" },
   { value: "grid", label: "Grid" },
+];
+
+const MOTION_MODES: SegmentOption<MotionPreference>[] = [
+  { value: "system", label: "System" },
+  { value: "full", label: "Full" },
+  { value: "reduced", label: "Reduced" },
 ];
 
 const SUBTITLE_SIZES: SegmentOption<"sm" | "md" | "lg">[] = [
@@ -77,15 +84,14 @@ export function AppearancePanel() {
       </SettingRow>
 
       <SettingRow
-        label="Reduce motion"
-        description="Collapses background drift, card transitions, and page animation."
-        htmlFor="set-reduce-motion"
+        label="Motion"
+        description="System follows your device setting. Full keeps ambient drift and entrance animation on even if your device asks to reduce it."
       >
-        <Toggle
-          id="set-reduce-motion"
-          label="Reduce motion"
-          checked={s.reduceMotion}
-          onChange={(next) => s.set("reduceMotion", next)}
+        <Segmented
+          label="Motion"
+          value={s.motion}
+          options={MOTION_MODES}
+          onChange={(next) => s.set("motion", next)}
         />
       </SettingRow>
     </SettingCard>
@@ -187,7 +193,7 @@ export function ServersPanel({ providers }: { providers: StreamProviderConfig[] 
           </span>
           <p className="mt-3 text-label-md text-white">No servers registered</p>
           <p className="mt-1.5 max-w-sm text-label-sm leading-relaxed text-white/65">
-            Nexa ships with no playback sources. Add your own licensed endpoints to the
+            Zenox ships with no playback sources. Add your own licensed endpoints to the
             <code className="mx-1 rounded bg-white/10 px-1.5 py-0.5 text-white/70">
               STREAM_PROVIDERS
             </code>
@@ -204,7 +210,7 @@ export function ServersPanel({ providers }: { providers: StreamProviderConfig[] 
     <SettingCard title="Servers" description="Where playback is resolved from.">
       <SettingRow
         label="Preferred server"
-        description="Tried first on every title. Nexa falls back automatically if it stalls."
+        description="Tried first on every title. Zenox falls back automatically if it stalls."
       >
         <SelectField
           label="Preferred server"

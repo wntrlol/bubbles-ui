@@ -3,23 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Bookmark, Clapperboard, Home, Menu, Search, Settings, Tv, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Bookmark, Menu, Search, Settings, X } from "lucide-react";
 
-import NexaMark from "@/components/NexaMark";
+import AccountMenu from "@/components/account/AccountMenu";
+import DiscordLink from "@/components/DiscordLink";
+import ZenoxMark from "@/components/ZenoxMark";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import { useOverlay } from "@/components/overlay/OverlayProvider";
 import { cn } from "@/lib/utils";
+import { useAppReducedMotion } from "@/lib/useMotionPreference";
 
 const LINKS = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/movies", label: "Movies", icon: Clapperboard },
-  { href: "/tv", label: "Shows", icon: Tv },
-  { href: "/my-list", label: "My List", icon: Bookmark },
+  { href: "/", label: "Home" },
+  { href: "/movies", label: "Movies" },
+  { href: "/tv", label: "Shows" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const reduce = useReducedMotion();
+  const reduce = useAppReducedMotion();
+  const { openSettings } = useOverlay();
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
@@ -28,84 +33,79 @@ export default function Navbar() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
-      <div className="flex w-full items-center justify-between gap-4 px-8 py-4 sm:px-12 sm:py-5 lg:px-16">
+      <div className="mx-auto grid max-w-page grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4 sm:px-6 sm:py-5">
         <Link
           href="/"
-          aria-label="Nexa home"
-          className="pointer-events-auto transition-transform duration-200 hover:scale-105 active:scale-95"
+          aria-label="Zenox home"
+          className="pointer-events-auto justify-self-start transition-transform duration-200 hover:scale-105 active:scale-95"
         >
-          <NexaMark className="size-9" />
+          <ZenoxMark className="size-9" />
         </Link>
 
-        {/* Desktop: one floating pill carrying navigation and utilities. */}
-        <nav className="pointer-events-auto hidden lg:block">
+        {/* Outer columns carry equal weight (1fr each), so the middle column
+            lands on the page centre no matter how wide the logo or the action
+            cluster grow. */}
+        <nav className="pointer-events-auto hidden justify-self-center lg:block">
           <ul className="flex items-center gap-1 rounded-full border border-white/12 bg-black/45 p-1.5 backdrop-blur-[20px]">
             {LINKS.map((link) => {
               const active = isActive(link.href);
-              const Icon = link.icon;
               return (
                 <li key={link.href} className="relative">
                   <Link
                     href={link.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "relative flex items-center gap-2 rounded-full px-4 py-2 text-label-md transition-colors duration-200",
-                      active ? "text-on-primary" : "text-white/60 hover:text-white",
+                      "relative block rounded-full px-5 py-2 text-label-md transition-colors duration-200",
+                      active ? "text-black" : "text-white/60 hover:text-white",
                     )}
                   >
-                    {/* Shared-element indicator: shows where you moved from. */}
                     {active && (
                       <motion.span
                         layoutId="nav-active"
-                        className="absolute inset-0 -z-10 rounded-full bg-primary"
-                        transformTemplate={(_, generated) =>
-                          generated
-                            .replace(/translate3d\(([^,]+),\s*[^,]+/, "translate3d($1, 0px")
-                            .replace(/translateY\([^)]+\)/, "translateY(0px)")
-                        }
+                        className="absolute inset-0 -z-10 rounded-full bg-white"
                         transition={
-                          reduce
-                            ? { duration: 0 }
-                            : { type: "spring", stiffness: 380, damping: 32 }
+                          reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }
                         }
                       />
                     )}
-                    {active && <Icon className="size-4" />}
                     {link.label}
                   </Link>
                 </li>
               );
             })}
-
-            <li aria-hidden className="mx-1 h-5 w-px bg-white/12" />
-
-            <li>
-              <IconLink href="/search" label="Search">
-                <Search className="size-4.5" />
-              </IconLink>
-            </li>
-            <li>
-              <IconLink href="/settings" label="Settings" active={pathname.startsWith("/settings")}>
-                <Settings className="size-4.5" />
-              </IconLink>
-            </li>
           </ul>
         </nav>
 
-        {/* Mobile: the same pill, condensed to utilities plus a sheet trigger. */}
-        <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-white/12 bg-black/45 p-1.5 backdrop-blur-[20px] lg:hidden">
+        <div className="pointer-events-auto col-start-3 flex items-center gap-1 justify-self-end rounded-full border border-white/12 bg-black/45 p-1.5 backdrop-blur-[20px]">
           <IconLink href="/search" label="Search">
             <Search className="size-4.5" />
           </IconLink>
-          <IconLink href="/settings" label="Settings" active={pathname.startsWith("/settings")}>
-            <Settings className="size-4.5" />
+
+          <IconLink href="/my-list" label="My list" active={pathname.startsWith("/my-list")}>
+            <Bookmark className="size-4.5" />
           </IconLink>
+
+          <NotificationBell />
+          <DiscordLink variant="icon" />
+
+          <button
+            type="button"
+            onClick={openSettings}
+            aria-label="Settings"
+            className="grid size-9 place-items-center rounded-full text-white/60 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+          >
+            <Settings className="size-4.5" />
+          </button>
+
+          <span aria-hidden className="mx-1 h-5 w-px bg-white/12" />
+          <AccountMenu />
+
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            className="grid size-9 place-items-center rounded-full text-white transition-colors hover:bg-white/10"
+            className="grid size-9 place-items-center rounded-full text-white transition-colors hover:bg-white/10 lg:hidden"
           >
             {menuOpen ? <X className="size-4.5" /> : <Menu className="size-4.5" />}
           </button>
@@ -124,18 +124,16 @@ export default function Navbar() {
             <ul>
               {LINKS.map((link) => {
                 const active = isActive(link.href);
-                const Icon = link.icon;
                 return (
                   <li key={link.href}>
                     <Link
                       href={link.href}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl px-4 py-3 text-label-md transition-colors",
+                        "block rounded-xl px-4 py-3 text-label-md transition-colors",
                         active ? "bg-white text-black" : "text-white/70 hover:bg-white/8 hover:text-white",
                       )}
                     >
-                      <Icon className="size-4.5" />
                       {link.label}
                     </Link>
                   </li>

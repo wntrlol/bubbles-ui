@@ -1,45 +1,46 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Montserrat } from "next/font/google";
+import { Manrope, Sora } from "next/font/google";
 
 import AmbientBackdrop from "@/components/AmbientBackdrop";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ScrollToTop from "@/components/ScrollToTop";
 import SettingsBridge from "@/components/SettingsBridge";
+import { OverlayProvider } from "@/components/overlay/OverlayProvider";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
-const inter = Inter({
-  variable: "--font-inter",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Nexa",
-    template: "%s · Nexa",
+    default: "Zenox",
+    template: "%s · Zenox",
   },
   description:
-    "Nexa is a cinematic streaming interface: a dense, fast catalog with a resilient multi-server playback engine.",
-  applicationName: "Nexa",
+    "A cinematic streaming interface: a dense, fast catalog with a resilient multi-server playback engine.",
+  applicationName: "Zenox",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04120b",
+  themeColor: "#071310",
   colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
+    <html lang="en" className={`${sora.variable} ${manrope.variable}`}>
       <body className="min-h-dvh bg-canvas text-white antialiased">
         <SettingsBridge />
         <AmbientBackdrop />
@@ -49,14 +50,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <div className="relative flex min-h-dvh flex-col">
-          <Navbar />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
-          <Footer />
-        </div>
-        <ScrollToTop />
+        {/* Settings and title details open as overlays rather than routes. */}
+        <OverlayProvider>
+          <div className="relative flex min-h-dvh flex-col">
+            <Navbar />
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <ScrollToTop />
+        </OverlayProvider>
       </body>
     </html>
   );

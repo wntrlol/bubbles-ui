@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { NexaLockup } from "@/components/NexaMark";
+import DiscordLink from "@/components/DiscordLink";
+import { ZenoxLockup } from "@/components/ZenoxMark";
 
 const COLUMNS = [
   {
@@ -37,11 +38,12 @@ export default function Footer() {
       <div className="w-full px-8 py-14 sm:px-12 lg:px-16">
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
-            <NexaLockup />
+            <ZenoxLockup />
             <p className="mt-4 max-w-sm text-body-md text-muted">
               A cinematic streaming interface. Catalog metadata is supplied by TMDB; playback servers
               are configured by the operator.
             </p>
+            <DiscordLink variant="full" className="mt-5" />
           </div>
 
           {COLUMNS.map((col) => (
@@ -66,9 +68,9 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-outline pt-6 text-label-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Nexa. Interface demonstration.</p>
+          <p>© {new Date().getFullYear()} Zenox. Interface demonstration.</p>
           <p className="max-w-xl sm:text-right">
-            Nexa hosts no media. This build ships with no playback sources configured. Operators
+            Zenox hosts no media. This build ships with no playback sources configured. Operators
             supply their own licensed endpoints.
           </p>
         </div>

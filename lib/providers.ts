@@ -3,7 +3,7 @@ import type { MediaType } from "./types";
 /**
  * Playback provider registry.
  *
- * Nexa ships with ZERO built-in sources. Every playback endpoint is supplied by
+ * Zenox ships with ZERO built-in sources. Every playback endpoint is supplied by
  * the operator through the `STREAM_PROVIDERS` environment variable, so the UI is
  * fully functional and testable without bundling anyone else's catalog.
  *
@@ -62,7 +62,7 @@ export function getStreamProviders(): StreamProviderConfig[] {
     if (!Array.isArray(parsed)) return [];
     return parsed.filter(isProvider);
   } catch {
-    console.warn("[nexa] STREAM_PROVIDERS is not valid JSON — no playback servers registered.");
+    console.warn("[zenox] STREAM_PROVIDERS is not valid JSON — no playback servers registered.");
     return [];
   }
 }

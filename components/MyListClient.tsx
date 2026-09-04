@@ -24,7 +24,7 @@ function toSummary(entry: LibraryEntry): MediaSummary {
     backdropPath: entry.backdropPath,
     releaseDate: entry.releaseDate,
     voteAverage: entry.voteAverage,
-    genreIds: [],
+    genreIds: entry.genreIds ?? [],
   };
 }
 

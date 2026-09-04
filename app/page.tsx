@@ -1,34 +1,61 @@
+import ForYouRail from "@/components/ForYouRail";
 import HeroBillboard from "@/components/HeroBillboard";
 import MediaRow from "@/components/MediaRow";
 import ProviderRail from "@/components/ProviderRail";
-import { getPopular, getTopRated, getTrending, getWatchProviders } from "@/lib/tmdb";
+import TopTenRail from "@/components/TopTenRail";
+import { discover, getPopular, getTopRated, getTrending, getWatchProviders } from "@/lib/tmdb";
 
 export const revalidate = 1800;
 
+/** Genre rails, sourced from TMDB's own genre ids. */
+const GENRE_RAILS = [
+  { id: 28, title: "Action Movies", type: "movie" as const },
+  { id: 35, title: "Comedy Movies", type: "movie" as const },
+  { id: 878, title: "Science Fiction", type: "movie" as const },
+  { id: 27, title: "Horror", type: "movie" as const },
+  { id: 10765, title: "Sci-Fi & Fantasy Series", type: "tv" as const },
+  { id: 80, title: "Crime Series", type: "tv" as const },
+];
+
 export default async function HomePage() {
-  const [trendingMovies, trendingTv, popularTv, topRatedMovies, popularMovies, providers] =
+  const [trendingMovies, trendingTv, popularTv, topRatedMovies, providers, ...genreRails] =
     await Promise.all([
       getTrending("movie", "week"),
       getTrending("tv", "week"),
       getPopular("tv"),
       getTopRated("movie"),
-      getPopular("movie"),
       getWatchProviders("movie"),
+      ...GENRE_RAILS.map((rail) =>
+        discover({ type: rail.type, genreId: rail.id, sort: "popularity" }),
+      ),
     ]);
 
   return (
     <>
       <HeroBillboard items={trendingMovies.slice(0, 5)} />
 
-      {/* Generous breathing room separating the hero billboard from the catalog rails. */}
-      <div className="relative pt-6 pb-14 sm:pt-10 lg:pt-14">
+      {/* Pulled into the hero's fade so the two read as one surface. */}
+      <div className="relative -mt-14 pb-10 lg:-mt-16">
         <ProviderRail providers={providers} />
 
-        <MediaRow title="Trending Movies" items={trendingMovies} href="/trending" priority />
+        <TopTenRail movies={trendingMovies} shows={trendingTv} />
+
+        <ForYouRail />
+
+        <MediaRow title="Trending Movies" items={trendingMovies} href="/trending" />
         <MediaRow title="Trending Series" items={trendingTv} href="/trending" />
-        <MediaRow title="Popular on Nexa" items={popularTv} href="/tv" />
-        <MediaRow title="Top Rated Classics" items={topRatedMovies} href="/movies?sort=rating" />
-        <MediaRow title="New in Film" items={popularMovies} href="/movies?sort=newest" />
+
+        {GENRE_RAILS.map((rail, i) => (
+          <MediaRow
+            key={rail.id}
+            title={rail.title}
+            items={genreRails[i].results}
+            href={`/${rail.type === "movie" ? "movies" : "tv"}?genre=${rail.id}`}
+          />
+        ))}
+
+        <MediaRow title="Popular Series" items={popularTv} href="/tv" />
+        <MediaRow title="Top Rated" items={topRatedMovies} href="/movies?sort=rating" />
       </div>
     </>
   );

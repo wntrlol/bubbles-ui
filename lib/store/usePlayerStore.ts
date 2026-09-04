@@ -68,7 +68,7 @@ export const usePlayerStore = create<PlayerState>()(
 
       clearMarks: () => set({ marks: {}, completed: [] }),
     }),
-    { name: "nexa.player.v1" },
+    { name: "zenox.player.v1" },
   ),
 );
 

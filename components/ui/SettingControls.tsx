@@ -1,10 +1,11 @@
 "use client";
 
 import { useId } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { useAppReducedMotion } from "@/lib/useMotionPreference";
 
 /* ------------------------------------------------------------- containers */
 
@@ -73,7 +74,7 @@ export function Toggle({
   onChange: (next: boolean) => void;
   label: string;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useAppReducedMotion();
   return (
     <button
       id={id}
@@ -116,7 +117,7 @@ export function Segmented<T extends string>({
   label: string;
 }) {
   const groupId = useId();
-  const reduce = useReducedMotion();
+  const reduce = useAppReducedMotion();
 
   return (
     <div

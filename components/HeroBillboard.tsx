@@ -61,36 +61,44 @@ export default function HeroBillboard({ items, leadRuntime }: HeroBillboardProps
       onMouseLeave={() => setIsPaused(false)}
       className="relative min-h-[82vh] w-full overflow-hidden lg:min-h-[88vh]"
     >
-      {/* Keyed so switching titles replays the fade rather than cutting. */}
-      <div key={featured.id} className="absolute inset-0 hero-fade">
-        <PosterArt
-          path={featured.backdropPath}
-          title={featured.title}
-          variant="backdrop"
-          imageSize="original"
-          sizes="100vw"
-          priority
-          showLabel={false}
-          className="object-cover object-top sm:object-center"
+      {/*
+        Artwork and its scrims share one masked layer, so they fade out together
+        and the page's own background carries on underneath. Covering the bottom
+        with an opaque colour instead would paint over the ambient backdrop and
+        leave a hard edge where the section ends.
+      */}
+      <div aria-hidden className="hero-visual absolute inset-0">
+        {/* Keyed so switching titles replays the fade rather than cutting. */}
+        <div key={featured.id} className="absolute inset-0 hero-fade">
+          <PosterArt
+            path={featured.backdropPath}
+            title={featured.title}
+            variant="backdrop"
+            imageSize="original"
+            sizes="100vw"
+            priority
+            showLabel={false}
+            className="object-cover object-top sm:object-center"
+          />
+        </div>
+
+        {/* Darkening only, never reaching opaque: the mask owns the fade out. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.82) 10%, rgba(0,0,0,0.5) 34%, "
+              + "rgba(0,0,0,0.18) 58%, transparent 80%)",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, transparent 78%)",
+          }}
         />
       </div>
-
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to top, #000000 2%, rgba(0,0,0,0.72) 22%, rgba(0,0,0,0.2) 48%, transparent 70%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, transparent 78%)",
-        }}
-      />
 
       <div className="relative flex min-h-[82vh] w-full flex-col justify-end px-8 pb-20 pt-24 sm:px-12 lg:min-h-[88vh] lg:px-16 lg:pb-24">
         <div key={featured.id} className="max-w-xl">

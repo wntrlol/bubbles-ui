@@ -2,32 +2,32 @@
 
 @theme {
   /* ---- Canvas & elevation ------------------------------------------- */
-  --color-canvas: #000000;
+  --color-canvas: #071310;
   --color-dim: #050505;
-  --color-bright: #121212;
-  --color-surface-lowest: #080808;
-  --color-surface-low: #101010;
-  --color-surface: #171717;
-  --color-surface-high: #202020;
-  --color-surface-highest: #2b2b2b;
+  --color-bright: #1d1728;
+  --color-surface-lowest: #0a0a0a;
+  --color-surface-low: #131829;
+  --color-surface: #1c243c;
+  --color-surface-high: #251e32;
+  --color-surface-highest: #302741;
 
   /* ---- Accents ------------------------------------------------------- */
-  --color-primary: #ffffff;
-  --color-primary-hover: #e5e5e5;
+  --color-primary: #4fe3b0;
+  --color-primary-hover: #9df2d4;
   --color-on-primary: #000000;
-  --color-secondary: #a1a1aa;
-  --color-secondary-container: #27272a;
-  --color-muted: #8e8e93;
-  --color-badge-4k: #1f1f1f;
+  --color-secondary: #7a6bae;
+  --color-secondary-container: #5a4e8c;
+  --color-muted: #756790;
+  --color-badge-4k: #3f8a1d;
 
   /* ---- Structure ----------------------------------------------------- */
-  --color-outline: rgba(255, 255, 255, 0.12);
-  --color-outline-strong: rgba(255, 255, 255, 0.22);
+  --color-outline: rgba(255, 255, 255, 0.1);
+  --color-outline-strong: rgba(255, 255, 255, 0.2);
   --container-page: 1280px;
 
   /* ---- Type ---------------------------------------------------------- */
-  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
   /* ---- Motion -------------------------------------------------------- */
   --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -63,7 +63,7 @@
 
 /* ---- Ambient canvas -------------------------------------------------- */
 /* Hue is written at runtime by useAmbient(); the fields interpolate to it. */
-:root { --ambient-hue: 0; }
+:root { --ambient-hue: 150; }
 
 .ambient-field {
   position: absolute;
@@ -78,10 +78,10 @@
   inset-inline-start: -20%;
   block-size: 72vmax;
   inline-size: 72vmax;
-  opacity: 0.35;
+  opacity: 0.42;
   background: radial-gradient(
     circle at 35% 35%,
-    rgba(255, 255, 255, 0.05),
+    hsl(var(--ambient-hue) 72% 46% / 0.42),
     transparent 62%
   );
   animation: drift 26s ease-in-out infinite alternate;
@@ -92,10 +92,10 @@
   inset-inline-end: -26%;
   block-size: 62vmax;
   inline-size: 62vmax;
-  opacity: 0.3;
+  opacity: 0.4;
   background: radial-gradient(
     circle at 60% 40%,
-    rgba(255, 255, 255, 0.04),
+    hsl(calc(var(--ambient-hue) + 48) 46% 42% / 0.40),
     transparent 64%
   );
   animation: drift 32s ease-in-out -9s infinite alternate;
@@ -106,13 +106,13 @@
   inset-inline-start: 14%;
   block-size: 66vmax;
   inline-size: 66vmax;
-  opacity: 0.25;
+  opacity: 0.34;
   background: radial-gradient(
-    circle at 45% 55%,
-    rgba(255, 255, 255, 0.035),
-    transparent 60%
+    circle at 50% 50%,
+    hsl(calc(var(--ambient-hue) - 34) 40% 34% / 0.38),
+    transparent 66%
   );
-  animation: drift 28s ease-in-out -18s infinite alternate;
+  animation: drift 38s ease-in-out -18s infinite alternate;
 }
 
 .ambient-grain,
@@ -187,7 +187,7 @@
   border: 1px solid var(--color-outline-strong);
 }
 @utility glow-primary {
-  box-shadow: 0 8px 24px rgba(149, 255, 80, 0.15);
+  box-shadow: 0 8px 24px rgba(79, 227, 176, 0.15);
 }
 
 /* ---- Staggered reveal -------------------------------------------------- */
@@ -206,6 +206,142 @@
   animation: hero-fade-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
+/* ---- Hero ------------------------------------------------------------- */
+/*
+ * The billboard's visual layer is masked rather than covered. Fading to an
+ * opaque colour would hide the ambient backdrop behind the hero and reveal it
+ * again below, which shows up as a hard line across the full width. Masking
+ * lets the page background run underneath without interruption.
+ */
+.hero-visual {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 50%,
+    rgba(0, 0, 0, 0.6) 76%,
+    transparent 97%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 50%,
+    rgba(0, 0, 0, 0.6) 76%,
+    transparent 97%
+  );
+}
+
+/* ---- Top 10 ------------------------------------------------------------ */
+/*
+ * The rank is the graphic. Outlined numerals sit behind each poster, so the
+ * position reads before the artwork does. Stroke rather than fill keeps them
+ * from competing with the posters for attention.
+ */
+.top-ten-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.9);
+}
+
+.top-ten-numeral {
+  font-family: var(--font-display);
+  font-size: clamp(6.5rem, 13vw, 11.5rem);
+  font-weight: 800;
+  line-height: 0.72;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.55);
+  user-select: none;
+  translate: 0 -0.35rem;
+}
+
+/* Older engines without text-stroke would render an invisible numeral. */
+@supports not (-webkit-text-stroke: 1px white) {
+  .top-ten-title,
+  .top-ten-numeral {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+/* ---- Dialogs ----------------------------------------------------------- */
+/*
+ * Native <dialog> in the top layer, so there is no z-index scale to maintain.
+ * Entry uses @starting-style; browsers without it simply show the dialog with
+ * no transition, which is the safe direction to fail in.
+ */
+.modal {
+  margin: auto;
+  width: calc(100% - 2rem);
+  max-height: min(86dvh, 56rem);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+  opacity: 0;
+  transform: translateY(10px) scale(0.985);
+  transition:
+    opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    overlay 220ms allow-discrete,
+    display 220ms allow-discrete;
+}
+
+.modal[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .modal[open] {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+}
+
+.modal::backdrop {
+  background: rgba(3, 8, 6, 0);
+  transition:
+    background 260ms ease,
+    overlay 260ms allow-discrete,
+    display 260ms allow-discrete;
+}
+
+.modal[open]::backdrop {
+  background: rgba(3, 8, 6, 0.74);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@starting-style {
+  .modal[open]::backdrop {
+    background: rgba(3, 8, 6, 0);
+  }
+}
+
+.modal-panel {
+  position: relative;
+  max-height: min(86dvh, 56rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 14, 12, 0.94);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.9);
+  scrollbar-width: thin;
+}
+
+.modal-panel::-webkit-scrollbar { width: 10px; }
+.modal-panel::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
 /* ---- Rails ------------------------------------------------------------ */
 @utility rail {
   scrollbar-width: none;
@@ -213,6 +349,11 @@
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
+  scroll-padding-inline-start: 1rem;
+}
+
+@media (min-width: 640px) {
+  .rail { scroll-padding-inline-start: 1.5rem; }
 }
 @utility rail-hide {
   &::-webkit-scrollbar { display: none; }
@@ -237,11 +378,6 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
-}
-
-input:focus,
-input:focus-visible {
-  outline: none !important;
 }
 
 /* Poster plates carry their own contrast; keep images from flashing white. */
@@ -269,21 +405,31 @@ p { text-wrap: pretty; }
 /* Anchored sections clear the floating nav when jumped to. */
 [id] { scroll-margin-top: 6rem; }
 
+/*
+ * Reduced motion stops *autonomous* movement: ambient drift, the liquid canvas,
+ * entrance reveals. Transitions are deliberately left alone, because hover and
+ * focus feedback is user-initiated and mostly colour. Killing that too makes
+ * every control feel dead, which is not what the preference asks for.
+ *
+ * Settings > Appearance > Motion overrides the OS in either direction:
+ *   data-motion="system"   follow prefers-reduced-motion (default)
+ *   data-motion="full"     animate regardless of the OS setting
+ *   data-motion="reduced"  reduce regardless of the OS setting
+ */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after {
+  :root:not([data-motion="full"]) { scroll-behavior: auto; }
+  :root:not([data-motion="full"]) *,
+  :root:not([data-motion="full"]) *::before,
+  :root:not([data-motion="full"]) *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 }
 
-/* Settings > Appearance > Reduce motion, applied to the document root. */
-[data-reduce-motion="true"] { scroll-behavior: auto; }
-[data-reduce-motion="true"] *,
-[data-reduce-motion="true"] *::before,
-[data-reduce-motion="true"] *::after {
+[data-motion="reduced"] { scroll-behavior: auto; }
+[data-motion="reduced"] *,
+[data-motion="reduced"] *::before,
+[data-motion="reduced"] *::after {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
-  transition-duration: 0.01ms !important;
 }

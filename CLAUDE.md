@@ -1,4 +1,4 @@
-# Project Memory: Nexa — Cinematic Streaming Platform
+# Project Memory: Zenox — Cinematic Streaming Platform
 
 ## Stack
 - Next.js 15 (App Router, Server Components, TypeScript strict)

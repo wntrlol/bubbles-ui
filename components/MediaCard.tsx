@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { Bookmark, BookmarkCheck, Play, Star } from "lucide-react";
+
+import Link from "next/link";
 
 import PosterArt from "@/components/PosterArt";
 import { useIsInWatchlist, useLibraryStore } from "@/lib/store/useLibraryStore";

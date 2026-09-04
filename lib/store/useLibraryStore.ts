@@ -8,6 +8,8 @@ export interface LibraryEntry {
   id: number;
   mediaType: MediaType;
   title: string;
+  /** Retained so recommendations can derive genre affinity from history. */
+  genreIds: number[];
   posterPath: string | null;
   backdropPath: string | null;
   releaseDate: string | null;
@@ -46,6 +48,7 @@ function toEntry(media: MediaSummary): LibraryEntry {
     id: media.id,
     mediaType: media.mediaType,
     title: media.title,
+    genreIds: media.genreIds ?? [],
     posterPath: media.posterPath,
     backdropPath: media.backdropPath,
     releaseDate: media.releaseDate,
@@ -109,7 +112,7 @@ export const useLibraryStore = create<LibraryState>()(
 
       clearHistory: () => set({ history: [] }),
     }),
-    { name: "nexa.library.v1" },
+    { name: "zenox.library.v1" },
   ),
 );
 
