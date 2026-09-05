@@ -46,7 +46,8 @@ export default function PosterArt({
         fill
         sizes={sizes}
         priority={priority}
-        className={cn("object-cover", className)}
+        draggable={false}
+        className={cn("object-cover select-none pointer-events-none", className)}
       />
     );
   }

@@ -10,7 +10,7 @@ const COLUMNS = [
       { href: "/movies", label: "Movies" },
       { href: "/tv", label: "Shows" },
       { href: "/trending", label: "Trending" },
-      { href: "/search", label: "Search" },
+      { href: "/?search=1", label: "Search" },
     ],
   },
   {
@@ -18,7 +18,7 @@ const COLUMNS = [
     links: [
       { href: "/my-list", label: "My List" },
       { href: "/my-list#history", label: "Continue Watching" },
-      { href: "/settings", label: "Settings" },
+      { href: "/?settings=1", label: "Settings" },
     ],
   },
   {

@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { tmdbImage } from "@/lib/tmdb-image";
-import { useRevealOnView } from "@/lib/useRevealOnView";
 import type { WatchProvider } from "@/lib/types";
 import { cn, posterGradient } from "@/lib/utils";
 
@@ -15,8 +14,6 @@ interface ProviderRailProps {
 }
 
 export default function ProviderRail({ providers, basePath = "/movies" }: ProviderRailProps) {
-  const railRef = useRevealOnView<HTMLUListElement>();
-
   if (!providers.length) return null;
 
   return (
@@ -26,14 +23,10 @@ export default function ProviderRail({ providers, basePath = "/movies" }: Provid
       </div>
 
       <div className="relative">
-        <ul
-          ref={railRef}
-          className="rail rail-hide flex w-full gap-5 overflow-x-auto px-8 pb-4 pt-3 sm:gap-7 sm:justify-center sm:px-12 lg:px-16"
-        >
-          {providers.map((provider, i) => (
+        <ul className="rail rail-hide flex w-full gap-5 overflow-x-auto px-8 pb-4 pt-3 sm:gap-7 sm:justify-center sm:px-12 lg:px-16">
+          {providers.map((provider) => (
             <li
               key={provider.id}
-              style={{ "--reveal-index": Math.min(i, 11) } as React.CSSProperties}
               className="w-[88px] shrink-0 sm:w-[102px]"
             >
               <Link
@@ -47,6 +40,10 @@ export default function ProviderRail({ providers, basePath = "/movies" }: Provid
                     "transition-[transform,border-color,box-shadow] duration-300",
                     "group-hover:-translate-y-1.5 group-hover:border-white/30",
                     "group-hover:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.85)]",
+                    "after:pointer-events-none after:absolute after:inset-0 after:content-['']",
+                    "after:bg-[linear-gradient(120deg,transparent_25%,rgba(255,255,255,0.14),transparent_72%)]",
+                    "after:-translate-x-full after:transition-transform after:duration-700 after:ease-out",
+                    "group-hover:after:translate-x-full",
                   )}
                 >
                   <ProviderTile provider={provider} />

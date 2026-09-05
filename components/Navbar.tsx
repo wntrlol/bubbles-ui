@@ -23,8 +23,15 @@ const LINKS = [
 export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { openSettings, openSearch } = useOverlay();
   const reduce = useAppReducedMotion();
-  const { openSettings } = useOverlay();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
@@ -33,13 +40,16 @@ export default function Navbar() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto grid max-w-page grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-4 sm:px-6 sm:py-5">
+      <div className="mx-auto grid max-w-[1536px] grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 py-4 sm:px-5 sm:py-5">
         <Link
           href="/"
           aria-label="Zenox home"
-          className="pointer-events-auto justify-self-start transition-transform duration-200 hover:scale-105 active:scale-95"
+          className="group pointer-events-auto justify-self-start -ml-3 sm:-ml-5 lg:-ml-6 transition-transform duration-200 hover:scale-105 active:scale-95"
         >
-          <ZenoxMark className="size-9" />
+          {/* <ZenoxMark className="size-9" /> */}
+          <span className="zenox-wordmark text-3xl sm:text-[2.25rem] lg:text-[2.6rem] font-black leading-none select-none">
+            zenox.
+          </span>
         </Link>
 
         {/* Outer columns carry equal weight (1fr each), so the middle column
@@ -56,13 +66,19 @@ export default function Navbar() {
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "relative block rounded-full px-5 py-2 text-label-md transition-colors duration-200",
-                      active ? "text-black" : "text-white/60 hover:text-white",
+                      active ? "text-on-primary font-medium" : "text-white/60 hover:text-white",
                     )}
                   >
                     {active && (
                       <motion.span
                         layoutId="nav-active"
-                        className="absolute inset-0 -z-10 rounded-full bg-white"
+                        className="absolute inset-0 -z-10 rounded-full bg-primary"
+                        transformTemplate={(_, generated) =>
+                          generated
+                            .replace(/translate3d\(([^,]+),\s*[^,]+/, "translate3d($1, 0px")
+                            .replace(/translate\(([^,]+),\s*[^)]+\)/, "translate($1, 0px)")
+                            .replace(/translateY\([^)]+\)/, "translateY(0px)")
+                        }
                         transition={
                           reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }
                         }
@@ -76,10 +92,15 @@ export default function Navbar() {
           </ul>
         </nav>
 
-        <div className="pointer-events-auto col-start-3 flex items-center gap-1 justify-self-end rounded-full border border-white/12 bg-black/45 p-1.5 backdrop-blur-[20px]">
-          <IconLink href="/search" label="Search">
+        <div className="pointer-events-auto col-start-3 flex items-center gap-1 justify-self-end -mr-3 sm:-mr-5 lg:-mr-6 rounded-full border border-white/12 bg-black/45 p-1.5 backdrop-blur-[20px]">
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search"
+            className="grid size-9 place-items-center rounded-full text-white/60 transition-colors duration-200 hover:bg-white/10 hover:text-white"
+          >
             <Search className="size-4.5" />
-          </IconLink>
+          </button>
 
           <IconLink href="/my-list" label="My list" active={pathname.startsWith("/my-list")}>
             <Bookmark className="size-4.5" />

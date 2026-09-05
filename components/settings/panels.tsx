@@ -109,6 +109,7 @@ function AccentPicker({
     <div role="radiogroup" aria-label="Accent colour" className="flex items-center gap-2">
       {ACCENTS.map((accent) => {
         const active = accent.id === value;
+        const isWhite = accent.id === "white";
         return (
           <button
             key={accent.id}
@@ -122,7 +123,11 @@ function AccentPicker({
             className={cn(
               "grid size-8 place-items-center rounded-full transition-transform duration-200",
               "ring-offset-2 ring-offset-black/60 hover:scale-110",
-              active ? "ring-2 ring-white" : "ring-0",
+              active
+                ? isWhite
+                  ? "ring-2 ring-white/50"
+                  : "ring-2 ring-white"
+                : "ring-0",
             )}
           >
             {active && <Check className="size-4 text-black" strokeWidth={3} />}

@@ -18,6 +18,8 @@ export interface MediaSummary {
   genreIds: number[];
   /** Present on TMDB list payloads for the homepage billboard ordering. */
   popularity?: number;
+  /** High-resolution transparent title logo art from TMDB. */
+  logoPath?: string | null;
 }
 
 export interface CastMember {
@@ -62,6 +64,7 @@ export interface MediaDetails extends MediaSummary {
   numberOfEpisodes: number | null;
   /** Filled from TMDB `recommendations` when available. */
   related: MediaSummary[];
+  trailerKey?: string | null;
 }
 
 export interface WatchProvider {

@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-
-import Link from "next/link";
+import { motion } from "motion/react";
 
 import PosterArt from "@/components/PosterArt";
+import { useOverlay } from "@/components/overlay/OverlayProvider";
+import { useSettingsStore } from "@/lib/store/useSettingsStore";
+import { useAppReducedMotion } from "@/lib/useMotionPreference";
 import type { MediaSummary } from "@/lib/types";
-import { useRevealOnView } from "@/lib/useRevealOnView";
 import { cn, rating, yearOf } from "@/lib/utils";
 
 interface TopTenRailProps {
@@ -22,7 +23,11 @@ interface TopTenRailProps {
 export default function TopTenRail({ movies, shows }: TopTenRailProps) {
   const [mode, setMode] = useState<"movie" | "tv">("movie");
   const [edges, setEdges] = useState({ start: true, end: false });
-  const railRef = useRevealOnView<HTMLUListElement>();
+  const railRef = useRef<HTMLUListElement>(null);
+  const cardTitles = useSettingsStore((s) => s.cardTitles);
+  const showTitles = cardTitles === "always";
+  const { openMedia } = useOverlay();
+  const reduce = useAppReducedMotion();
 
   const items = (mode === "movie" ? movies : shows).slice(0, 10);
 
@@ -46,10 +51,29 @@ export default function TopTenRail({ movies, shows }: TopTenRailProps) {
   }, [measure, railRef, mode]);
 
   const scrollBy = (direction: 1 | -1) => {
-    railRef.current?.scrollBy({
-      left: direction * Math.round((railRef.current.clientWidth ?? 0) * 0.85),
-      behavior: "smooth",
-    });
+    const el = railRef.current;
+    if (!el) return;
+
+    const cards = Array.from(el.querySelectorAll("li:not([aria-hidden])")) as HTMLElement[];
+    if (!cards.length) return;
+
+    const currentScroll = el.scrollLeft;
+    const viewportWidth = el.clientWidth;
+    const startOffset = cards[0]?.offsetLeft || 0;
+
+    let targetCard: HTMLElement | undefined;
+    if (direction === 1) {
+      targetCard = cards.find((card) => card.offsetLeft >= currentScroll + viewportWidth - 60);
+      if (!targetCard) targetCard = cards[cards.length - 1];
+    } else {
+      targetCard = [...cards].reverse().find((card) => card.offsetLeft <= currentScroll - viewportWidth + 60);
+      if (!targetCard) targetCard = cards[0];
+    }
+
+    if (targetCard) {
+      const targetScroll = Math.max(0, targetCard.offsetLeft - startOffset);
+      el.scrollTo({ left: targetScroll, behavior: "smooth" });
+    }
   };
 
   if (!items.length) return null;
@@ -70,21 +94,40 @@ export default function TopTenRail({ movies, shows }: TopTenRailProps) {
             aria-label="Top 10 media type"
             className="flex items-center gap-0.5 rounded-full border border-white/12 bg-white/[0.06] p-0.5"
           >
-            {(["movie", "tv"] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={mode === value}
-                onClick={() => setMode(value)}
-                className={cn(
-                  "rounded-full px-4 py-1.5 text-label-sm transition-colors duration-200",
-                  mode === value ? "bg-white text-black" : "text-white/60 hover:text-white",
-                )}
-              >
-                {value === "movie" ? "Movies" : "Shows"}
-              </button>
-            ))}
+            {(["movie", "tv"] as const).map((value) => {
+              const active = mode === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => {
+                    if (mode !== value) {
+                      setMode(value);
+                      railRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+                    }
+                  }}
+                  className={cn(
+                    "relative rounded-full px-4 py-1.5 text-label-sm transition-colors duration-200",
+                    active ? "text-black font-medium" : "text-white/60 hover:text-white",
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="top-ten-segmented"
+                      className="absolute inset-0 -z-10 rounded-full bg-white"
+                      transition={
+                        reduce
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 420, damping: 34 }
+                      }
+                    />
+                  )}
+                  {value === "movie" ? "Movies" : "Shows"}
+                </button>
+              );
+            })}
           </div>
 
           <div className="hidden items-center gap-1.5 md:flex">
@@ -97,7 +140,7 @@ export default function TopTenRail({ movies, shows }: TopTenRailProps) {
       <ul
         ref={railRef}
         onScroll={measure}
-        className="rail rail-hide mx-auto flex max-w-page snap-x gap-2 overflow-x-auto px-4 pb-3 sm:gap-4 sm:px-6"
+        className="rail rail-hide mx-auto flex max-w-page snap-x gap-2 overflow-x-auto overflow-y-hidden px-4 pb-6 pt-7 sm:gap-4 sm:px-6"
       >
         {/* Matches the catalog rails, and gives the first numeral room to breathe. */}
         <li aria-hidden className="w-2 shrink-0 sm:w-6 lg:w-10" />
@@ -105,16 +148,20 @@ export default function TopTenRail({ movies, shows }: TopTenRailProps) {
         {items.map((media, i) => (
           <li
             key={`${media.mediaType}-${media.id}`}
-            style={{ "--reveal-index": Math.min(i, 9) } as React.CSSProperties}
             className="flex shrink-0 snap-start items-end"
           >
             <span aria-hidden className="top-ten-numeral">
               {i + 1}
             </span>
 
-            <Link
-              href={`/watch/${media.mediaType}/${media.id}`}
-              className="group -ml-6 block w-[42vw] min-w-[145px] max-w-[215px] sm:-ml-9 sm:w-[28vw] md:w-[20vw] lg:w-[15vw] xl:w-[12.8vw] 2xl:w-[11.2vw]"
+            <button
+              type="button"
+              onClick={() => openMedia(media.mediaType, media.id)}
+              className={cn(
+                "group block cursor-pointer text-left w-[42vw] min-w-[145px] max-w-[215px] sm:w-[28vw] md:w-[20vw] lg:w-[15vw] xl:w-[12.8vw] 2xl:w-[11.2vw]",
+                i === 9 ? "-ml-8 sm:-ml-12" : "-ml-5 sm:-ml-7",
+              )}
+              aria-label={`View details for ${media.title}`}
             >
               <span className="relative block aspect-2/3 overflow-hidden rounded-xl border border-white/10 transition-transform duration-300 group-hover:-translate-y-1.5">
                 <PosterArt
@@ -124,19 +171,23 @@ export default function TopTenRail({ movies, shows }: TopTenRailProps) {
                   priority={i < 4}
                 />
               </span>
-              <span className="mt-2 block truncate text-label-md text-white">{media.title}</span>
-              <span className="mt-0.5 flex items-center gap-2 text-label-sm text-white/50">
-                {rating(media.voteAverage) && (
-                  <span className="flex items-center gap-1">
-                    <Star className="size-3 fill-primary text-primary" />
-                    <span className="tabular-nums">{rating(media.voteAverage)}</span>
+              {showTitles && (
+                <>
+                  <span className="mt-2 block truncate text-label-md text-white">{media.title}</span>
+                  <span className="mt-0.5 flex items-center gap-2 text-label-sm text-white/50">
+                    {rating(media.voteAverage) && (
+                      <span className="flex items-center gap-1">
+                        <Star className="size-3 fill-primary text-primary" />
+                        <span className="tabular-nums">{rating(media.voteAverage)}</span>
+                      </span>
+                    )}
+                    {yearOf(media.releaseDate) && (
+                      <span className="tabular-nums">{yearOf(media.releaseDate)}</span>
+                    )}
                   </span>
-                )}
-                {yearOf(media.releaseDate) && (
-                  <span className="tabular-nums">{yearOf(media.releaseDate)}</span>
-                )}
-              </span>
-            </Link>
+                </>
+              )}
+            </button>
           </li>
         ))}
       </ul>

@@ -39,7 +39,7 @@ export default function SettingsClient({ providers }: { providers: StreamProvide
   const reduce = useReducedMotion();
 
   return (
-    <div className="relative isolate min-h-dvh overflow-hidden">
+    <div className="relative isolate min-h-dvh">
       <LiquidBackdrop />
 
       <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-24 sm:px-6 lg:pt-28">

@@ -2,23 +2,23 @@
 
 @theme {
   /* ---- Canvas & elevation ------------------------------------------- */
-  --color-canvas: #071310;
+  --color-canvas: #000000;
   --color-dim: #050505;
-  --color-bright: #1d1728;
-  --color-surface-lowest: #0a0a0a;
-  --color-surface-low: #131829;
-  --color-surface: #1c243c;
-  --color-surface-high: #251e32;
-  --color-surface-highest: #302741;
+  --color-bright: #121212;
+  --color-surface-lowest: #080808;
+  --color-surface-low: #101010;
+  --color-surface: #171717;
+  --color-surface-high: #202020;
+  --color-surface-highest: #2b2b2b;
 
   /* ---- Accents ------------------------------------------------------- */
-  --color-primary: #4fe3b0;
-  --color-primary-hover: #9df2d4;
+  --color-primary: #ffffff;
+  --color-primary-hover: #e0e0e0;
   --color-on-primary: #000000;
-  --color-secondary: #7a6bae;
-  --color-secondary-container: #5a4e8c;
-  --color-muted: #756790;
-  --color-badge-4k: #3f8a1d;
+  --color-secondary: #a1a1aa;
+  --color-secondary-container: #27272a;
+  --color-muted: #8e8e93;
+  --color-badge-4k: #1f1f1f;
 
   /* ---- Structure ----------------------------------------------------- */
   --color-outline: rgba(255, 255, 255, 0.1);
@@ -61,9 +61,30 @@
   100% { transform: translate3d(-8%, -6%, 0) rotate(360deg) scale(1.05); }
 }
 
+/* Disable default scrollbars on the website while keeping smooth native scrolling */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+img,
+svg {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* ---- Ambient canvas -------------------------------------------------- */
 /* Hue is written at runtime by useAmbient(); the fields interpolate to it. */
-:root { --ambient-hue: 150; }
+:root { --ambient-hue: 0; }
 
 .ambient-field {
   position: absolute;
@@ -187,7 +208,7 @@
   border: 1px solid var(--color-outline-strong);
 }
 @utility glow-primary {
-  box-shadow: 0 8px 24px rgba(79, 227, 176, 0.15);
+  box-shadow: var(--glow-primary-shadow, 0 8px 24px rgba(255, 255, 255, 0.10));
 }
 
 /* ---- Staggered reveal -------------------------------------------------- */
@@ -241,9 +262,11 @@
   font-size: clamp(2.5rem, 6vw, 4.5rem);
   font-weight: 800;
   line-height: 0.85;
-  letter-spacing: -0.04em;
-  color: transparent;
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.08em;
+  color: var(--color-canvas);
+  -webkit-text-stroke: 4px rgba(255, 255, 255, 0.95);
+  paint-order: stroke fill;
+  display: inline-block;
 }
 
 .top-ten-numeral {
@@ -251,10 +274,12 @@
   font-size: clamp(6.5rem, 13vw, 11.5rem);
   font-weight: 800;
   line-height: 0.72;
-  color: transparent;
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+  color: var(--color-canvas);
+  -webkit-text-stroke: 4px rgba(255, 255, 255, 0.7);
+  paint-order: stroke fill;
   user-select: none;
-  translate: 0 -0.35rem;
+  translate: 0 -0.15rem;
 }
 
 /* Older engines without text-stroke would render an invisible numeral. */
@@ -314,6 +339,10 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
+[data-accent="white"] .modal[open]::backdrop {
+  background: rgba(0, 0, 0, 0.78);
+}
+
 @starting-style {
   .modal[open]::backdrop {
     background: rgba(3, 8, 6, 0);
@@ -331,25 +360,33 @@
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
   box-shadow: 0 32px 80px -24px rgba(0, 0, 0, 0.9);
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.modal-panel::-webkit-scrollbar { width: 10px; }
-.modal-panel::-webkit-scrollbar-thumb {
-  border: 3px solid transparent;
-  background-clip: content-box;
-  border-radius: 999px;
-  background-color: rgba(255, 255, 255, 0.16);
+[data-accent="white"] .modal-panel {
+  background: rgba(10, 10, 10, 0.96);
+}
+
+.modal-panel::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* ---- Rails ------------------------------------------------------------ */
 @utility rail {
   scrollbar-width: none;
   -ms-overflow-style: none;
-  scroll-behavior: smooth;
+  will-change: scroll-position;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
   scroll-padding-inline-start: 1rem;
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 @media (min-width: 640px) {
@@ -357,6 +394,57 @@
 }
 @utility rail-hide {
   &::-webkit-scrollbar { display: none; }
+}
+
+/* ---- Zenox Metallic Silver Brand Typography & Internal Glint ---------- */
+.zenox-wordmark,
+.chrome-text {
+  display: inline-block;
+  font-family: var(--font-display);
+  background-image:
+    /* Layer 1 (top): 120deg tilted bright specular glint beam that sweeps across inside the letters */
+    linear-gradient(
+      120deg,
+      transparent 0%,
+      transparent 42%,
+      rgba(255, 255, 255, 0.3) 46%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 0.3) 54%,
+      transparent 58%,
+      transparent 100%
+    ),
+    /* Layer 2 (bottom): Solid stationary metallic silver chrome horizon */
+    linear-gradient(
+      175deg,
+      #ffffff 0%,
+      #e2e8f0 22%,
+      #ffffff 44%,
+      #f8fafc 48%,
+      #94a3b8 53%,
+      #475569 73%,
+      #94a3b8 88%,
+      #334155 100%
+    );
+  background-size: 320% 100%, 100% 100%;
+  background-position: 140% 0, 0 0;
+  background-repeat: no-repeat, no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.4px rgba(255, 255, 255, 0.45);
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.9)) drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6));
+  letter-spacing: -0.04em;
+  transition: background-position 1.8s cubic-bezier(0.2, 0.75, 0.2, 1), filter 0.6s ease;
+}
+
+.group:hover .zenox-wordmark,
+.zenox-wordmark:hover,
+.group:hover .chrome-text,
+.chrome-text:hover {
+  background-position: -50% 0, 0 0;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.9))
+          drop-shadow(0 8px 18px rgba(0, 0, 0, 0.6))
+          drop-shadow(0 0 12px rgba(255, 255, 255, 0.12));
 }
 
 /* ---- Base ------------------------------------------------------------- */
@@ -382,6 +470,13 @@ body {
 
 /* Poster plates carry their own contrast; keep images from flashing white. */
 img { background-color: transparent; }
+
+/* Search inputs use the parent container's focus-within ring instead. */
+input[type="search"]:focus-visible,
+input[type="search"]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
 
 /* Kill the 300ms tap delay and the default blue flash on every control. */
 a,

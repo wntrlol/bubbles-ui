@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import MediaCard from "@/components/MediaCard";
-import { useRevealOnView } from "@/lib/useRevealOnView";
 import type { MediaSummary } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -15,11 +14,42 @@ interface MediaRowProps {
   /** Optional "View All" destination shown beside the heading. */
   href?: string;
   priority?: boolean;
+  lazy?: boolean;
 }
 
-export default function MediaRow({ title, items, href, priority }: MediaRowProps) {
-  const railRef = useRevealOnView<HTMLUListElement>();
+export default function MediaRow({ title, items, href, priority, lazy = false }: MediaRowProps) {
+  const [isVisible, setIsVisible] = useState(!lazy);
+  const containerRef = useRef<HTMLElement>(null);
+  const railRef = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
+
+  // Viewport checkpoint observer: loads 800px ahead of scroll so it's already rendered before reaching view
+  useEffect(() => {
+    if (!lazy || isVisible) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [lazy, isVisible]);
 
   const measure = useCallback(() => {
     const el = railRef.current;
@@ -29,27 +59,73 @@ export default function MediaRow({ title, items, href, priority }: MediaRowProps
       start: el.scrollLeft <= 8,
       end: maxScroll <= 8 || el.scrollLeft >= maxScroll - 8,
     });
-  }, [railRef]);
+  }, []);
 
   useEffect(() => {
+    if (!isVisible) return;
     measure();
     const el = railRef.current;
     if (!el) return;
     const observer = new ResizeObserver(measure);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [measure, railRef, items.length]);
+  }, [measure, isVisible, items.length]);
 
   const scrollBy = (direction: 1 | -1) => {
     const el = railRef.current;
     if (!el) return;
-    el.scrollBy({ left: direction * Math.round(el.clientWidth * 0.85), behavior: "smooth" });
+
+    const cards = Array.from(el.querySelectorAll("li:not([aria-hidden])")) as HTMLElement[];
+    if (!cards.length) return;
+
+    const currentScroll = el.scrollLeft;
+    const viewportWidth = el.clientWidth;
+    const startOffset = cards[0]?.offsetLeft || 0;
+
+    let targetCard: HTMLElement | undefined;
+    if (direction === 1) {
+      targetCard = cards.find((card) => card.offsetLeft >= currentScroll + viewportWidth - 60);
+      if (!targetCard) targetCard = cards[cards.length - 1];
+    } else {
+      targetCard = [...cards].reverse().find((card) => card.offsetLeft <= currentScroll - viewportWidth + 60);
+      if (!targetCard) targetCard = cards[0];
+    }
+
+    if (targetCard) {
+      const targetScroll = Math.max(0, targetCard.offsetLeft - startOffset);
+      el.scrollTo({ left: targetScroll, behavior: "smooth" });
+    }
   };
 
   if (!items.length) return null;
 
+  if (lazy && !isVisible) {
+    return (
+      <section
+        ref={containerRef}
+        className="relative py-5 sm:py-6"
+        style={{
+          minHeight: "330px",
+          contentVisibility: "auto",
+          containIntrinsicSize: "auto 330px",
+        }}
+      >
+        <div className="mb-3 flex w-full items-center justify-between gap-4 px-8 sm:px-12 lg:px-16">
+          <h2 className="text-headline-md text-white">{title}</h2>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="relative py-5 sm:py-6">
+    <section
+      ref={containerRef}
+      className="relative py-5 sm:py-6"
+      style={{
+        contentVisibility: "auto",
+        containIntrinsicSize: "auto 330px",
+      }}
+    >
       <div className="mb-3 flex w-full items-center justify-between gap-4 px-8 sm:px-12 lg:px-16">
         <h2 className="text-headline-md text-white">{title}</h2>
 
@@ -81,7 +157,6 @@ export default function MediaRow({ title, items, href, priority }: MediaRowProps
       </div>
 
       <div className="relative">
-        {/* Cards arrive in reading order as the rail enters the viewport. */}
         <ul
           ref={railRef}
           onScroll={measure}
@@ -93,7 +168,6 @@ export default function MediaRow({ title, items, href, priority }: MediaRowProps
           {items.map((media, i) => (
             <li
               key={`${media.mediaType}-${media.id}`}
-              style={{ "--reveal-index": Math.min(i, 9) } as React.CSSProperties}
               className="w-[42vw] shrink-0 snap-start sm:w-[28vw] md:w-[20vw] lg:w-[15vw] xl:w-[12.8vw] 2xl:w-[11.2vw] min-w-[145px] max-w-[215px]"
             >
               <MediaCard media={media} priority={priority && i < 6} />

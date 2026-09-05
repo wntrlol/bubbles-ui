@@ -29,10 +29,10 @@ export default function ZenoxMark({ className }: { className?: string }) {
 /** Mark plus wordmark, for the footer and other full-width lockups. */
 export function ZenoxLockup({ className }: { className?: string }) {
   return (
-    <span className={cn("flex items-center gap-2.5", className)}>
-      <ZenoxMark className="size-8" />
-      <span className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-white">
-        Zenox
+    <span className={cn("group flex items-center gap-2.5", className)}>
+      {/* <ZenoxMark className="size-8" /> */}
+      <span className="zenox-wordmark text-3xl font-black leading-none select-none">
+        zenox.
       </span>
     </span>
   );

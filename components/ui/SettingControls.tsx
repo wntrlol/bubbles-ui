@@ -2,10 +2,9 @@
 
 import { useId } from "react";
 import { motion } from "motion/react";
-import { ChevronDown } from "lucide-react";
 
+import Dropdown from "@/components/ui/Dropdown";
 import { cn } from "@/lib/utils";
-import { useAppReducedMotion } from "@/lib/useMotionPreference";
 
 /* ------------------------------------------------------------- containers */
 
@@ -19,7 +18,7 @@ export function SettingCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-white/12 bg-black/62 backdrop-blur-[24px]">
+    <section className="relative rounded-2xl border border-white/12 bg-black/62 backdrop-blur-[24px]">
       <header className="px-5 pb-4 pt-5 sm:px-6">
         <h2 className="text-title-lg text-white">{title}</h2>
         {description && <p className="mt-1 text-body-md text-white/70">{description}</p>}
@@ -74,7 +73,6 @@ export function Toggle({
   onChange: (next: boolean) => void;
   label: string;
 }) {
-  const reduce = useAppReducedMotion();
   return (
     <button
       id={id}
@@ -89,8 +87,8 @@ export function Toggle({
       )}
     >
       <motion.span
-        layout={!reduce}
-        transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 520, damping: 34 }}
+        layout
+        transition={{ type: "spring", stiffness: 520, damping: 34 }}
         className={cn(
           "block size-5 rounded-full shadow-sm",
           checked ? "ml-auto bg-on-primary" : "bg-white/70",
@@ -117,7 +115,6 @@ export function Segmented<T extends string>({
   label: string;
 }) {
   const groupId = useId();
-  const reduce = useAppReducedMotion();
 
   return (
     <div
@@ -143,9 +140,7 @@ export function Segmented<T extends string>({
               <motion.span
                 layoutId={`seg-${groupId}`}
                 className="absolute inset-0 -z-10 rounded-full bg-white"
-                transition={
-                  reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }
-                }
+                transition={{ type: "spring", stiffness: 420, damping: 34 }}
               />
             )}
             {option.label}
@@ -170,25 +165,15 @@ export function SelectField<T extends string>({
   label: string;
 }) {
   return (
-    <div className="relative">
-      <select
-        id={id}
-        value={value}
-        aria-label={label}
-        onChange={(e) => onChange(e.target.value as T)}
-        className="appearance-none rounded-full border border-white/15 bg-surface-highest py-2 pl-4 pr-10 text-label-md text-white transition-colors hover:border-white/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value} className="bg-surface-highest">
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        aria-hidden
-        className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-white/45"
-      />
-    </div>
+    <Dropdown
+      id={id}
+      value={value}
+      options={options}
+      onChange={onChange}
+      label={label}
+      size="md"
+      align="right"
+    />
   );
 }
 

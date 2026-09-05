@@ -5,6 +5,7 @@ import { Bookmark, History, Play, Trash2, X } from "lucide-react";
 
 import PosterArt from "@/components/PosterArt";
 import CatalogGrid from "@/components/CatalogGrid";
+import { useOverlay } from "@/components/overlay/OverlayProvider";
 import {
   useLibraryStore,
   type HistoryEntry,
@@ -103,23 +104,31 @@ export default function MyListClient() {
 
 function HistoryCard({ entry }: { entry: HistoryEntry }) {
   const remove = useLibraryStore((s) => s.removeFromHistory);
+  const { openMedia } = useOverlay();
   const pct = Math.min(100, Math.round(entry.progress * 100));
   const episodeLabel =
     entry.season && entry.episode ? `S${entry.season} · E${entry.episode}` : null;
 
   return (
     <li className="glass group relative flex gap-4 overflow-hidden rounded-xl p-3 transition-colors hover:border-primary/25">
-      <Link
-        href={`/watch/${entry.mediaType}/${entry.id}`}
-        className="relative aspect-2/3 w-20 shrink-0 overflow-hidden rounded-lg"
+      <button
+        type="button"
+        onClick={() => openMedia(entry.mediaType, entry.id)}
+        className="relative aspect-2/3 w-20 shrink-0 overflow-hidden rounded-lg cursor-pointer"
       >
         <PosterArt path={entry.posterPath} title={entry.title} sizes="80px" showLabel={false} />
-      </Link>
+      </button>
 
       <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
         <div className="min-w-0">
           <h3 className="truncate text-title-lg text-white">
-            <Link href={`/watch/${entry.mediaType}/${entry.id}`}>{entry.title}</Link>
+            <button
+              type="button"
+              onClick={() => openMedia(entry.mediaType, entry.id)}
+              className="hover:underline text-left"
+            >
+              {entry.title}
+            </button>
           </h3>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-sm text-muted">
             {yearOf(entry.releaseDate) && <span>{yearOf(entry.releaseDate)}</span>}
@@ -136,13 +145,14 @@ function HistoryCard({ entry }: { entry: HistoryEntry }) {
             <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
           </div>
           <div className="mt-2.5 flex items-center gap-2">
-            <Link
-              href={`/watch/${entry.mediaType}/${entry.id}`}
+            <button
+              type="button"
+              onClick={() => openMedia(entry.mediaType, entry.id)}
               className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-label-sm font-semibold text-on-primary transition-colors hover:bg-primary-hover"
             >
               <Play className="size-3.5 fill-current" />
               {pct > 0 ? "Resume" : "Play"}
-            </Link>
+            </button>
             <span className="text-label-sm text-muted">{pct}% watched</span>
           </div>
         </div>

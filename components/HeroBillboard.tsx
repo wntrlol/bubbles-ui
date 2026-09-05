@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Bookmark, BookmarkCheck, Play, Star } from "lucide-react";
+import { Bookmark, BookmarkCheck, Info, Play, Star } from "lucide-react";
 
 import PosterArt from "@/components/PosterArt";
+import { useOverlay } from "@/components/overlay/OverlayProvider";
 import { useAmbient } from "@/lib/ambient";
 import { useIsInWatchlist, useLibraryStore } from "@/lib/store/useLibraryStore";
 import { useHydrated } from "@/lib/store/usePlayerStore";
+import { tmdbImage } from "@/lib/tmdb-image";
 import type { MediaSummary } from "@/lib/types";
 import { cn, formatRuntime, hueFromSeed, rating, truncate, yearOf } from "@/lib/utils";
 
@@ -27,8 +30,10 @@ interface HeroBillboardProps {
 export default function HeroBillboard({ items, leadRuntime }: HeroBillboardProps) {
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [logos, setLogos] = useState<Record<string, string | null>>({});
   const hydrated = useHydrated();
   const toggleWatchlist = useLibraryStore((s) => s.toggleWatchlist);
+  const { openMedia } = useOverlay();
 
   // Auto-advance every 15 seconds, pausing when user hovers or interacts
   useEffect(() => {
@@ -43,11 +48,33 @@ export default function HeroBillboard({ items, leadRuntime }: HeroBillboardProps
   const featured = items[index];
   const saved = useIsInWatchlist(featured?.id ?? 0, featured?.mediaType ?? "movie");
 
+  // Fetch title logos for billboard items
+  useEffect(() => {
+    const leadItems = items.slice(0, 5);
+    leadItems.forEach((item) => {
+      const key = `${item.mediaType}-${item.id}`;
+      const logoVal = item.logoPath ?? null;
+      if (item.logoPath) {
+        setLogos((prev) => (prev[key] === logoVal ? prev : { ...prev, [key]: logoVal }));
+      } else if (!(key in logos)) {
+        fetch(`/api/logo/${item.mediaType}/${item.id}`)
+          .then((r) => r.json())
+          .then((d: { logoPath: string | null }) => {
+            setLogos((prev) => ({ ...prev, [key]: d.logoPath }));
+          })
+          .catch(() => {
+            setLogos((prev) => ({ ...prev, [key]: null }));
+          });
+      }
+    });
+  }, [items]);
+
   // Spill the artwork's hue into the page canvas.
   useAmbient(featured ? hueFromSeed(featured.title) : null);
 
   if (!featured) return null;
 
+  const currentLogo = featured.logoPath || logos[`${featured.mediaType}-${featured.id}`];
   const year = yearOf(featured.releaseDate);
   const releaseYearNum = year ? parseInt(year, 10) : 0;
   // Recent high-definition productions are labeled 4K, earlier/standard titles are labeled HD
@@ -82,37 +109,49 @@ export default function HeroBillboard({ items, leadRuntime }: HeroBillboardProps
           />
         </div>
 
-        {/* Darkening only, never reaching opaque: the mask owns the fade out. */}
+        {/* Natural gradient fade matching streaming references: vibrant artwork on right, readable on left */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to top, rgba(0,0,0,0.82) 10%, rgba(0,0,0,0.5) 34%, "
-              + "rgba(0,0,0,0.18) 58%, transparent 80%)",
+              "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 24%, rgba(0,0,0,0.15) 50%, transparent 75%)",
           }}
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, transparent 78%)",
+              "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.15) 60%, transparent 85%)",
           }}
         />
       </div>
 
-      <div className="relative flex min-h-[82vh] w-full flex-col justify-end px-8 pb-20 pt-24 sm:px-12 lg:min-h-[88vh] lg:px-16 lg:pb-24">
-        <div key={featured.id} className="max-w-xl">
-          <h1 className="text-display text-white">
-            {featured.title}
-          </h1>
+      <div className="relative flex min-h-[84vh] w-full flex-col justify-end px-8 pb-20 pt-24 sm:px-12 lg:min-h-[90vh] lg:px-16 lg:pb-24">
+        <div key={featured.id} className="max-w-2xl">
+          {currentLogo ? (
+            <div className="mb-5 max-w-[80%] sm:max-w-[65%] md:max-w-[55%]">
+              <Image
+                src={tmdbImage(currentLogo, "original")!}
+                alt={featured.title}
+                width={560}
+                height={220}
+                priority
+                className="h-20 w-auto max-w-full object-contain object-left brightness-110 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] sm:h-28 md:h-36"
+              />
+            </div>
+          ) : (
+            <h1 className="text-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
+              {featured.title}
+            </h1>
+          )}
 
-          <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-2.5">
             {is4K ? (
-              <span className="rounded bg-white/15 px-2 py-0.5 text-label-sm font-semibold text-white">
+              <span className="rounded bg-white/20 px-2.5 py-0.5 text-label-sm font-semibold text-white">
                 4K
               </span>
             ) : (
-              <span className="rounded border border-white/20 bg-white/10 px-2 py-0.5 text-label-sm font-semibold text-white/90">
+              <span className="rounded border border-white/25 bg-white/10 px-2.5 py-0.5 text-label-sm font-semibold text-white/90">
                 HD
               </span>
             )}
@@ -128,34 +167,44 @@ export default function HeroBillboard({ items, leadRuntime }: HeroBillboardProps
           </div>
 
           {featured.overview && (
-            <p className="mt-5 max-w-lg text-body-lg leading-relaxed text-white/65">
-              {truncate(featured.overview, 165)}
+            <p className="mt-5 max-w-xl text-body-lg sm:text-title-md leading-relaxed text-white/80 font-normal">
+              {truncate(featured.overview, 185)}
             </p>
           )}
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href={`/watch/${featured.mediaType}/${featured.id}`}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3 text-label-md font-semibold text-on-primary transition-[background-color,transform] duration-200 hover:bg-primary-hover active:scale-[0.98]"
+          <div className="mt-8 flex flex-wrap items-center gap-3.5">
+            <button
+              type="button"
+              onClick={() => openMedia(featured.mediaType, featured.id)}
+              className="inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-3.5 text-label-md font-bold text-on-primary transition-[background-color,transform] duration-200 hover:bg-primary-hover active:scale-[0.98]"
             >
-              <Play className="size-4.5 fill-current" />
+              <Play className="size-5 fill-current" />
               Watch Now
-            </Link>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => openMedia(featured.mediaType, featured.id)}
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-7 py-3.5 text-label-md font-semibold text-white backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-white/20 active:scale-[0.98]"
+            >
+              <Info className="size-5" />
+              Details
+            </button>
 
             <button
               type="button"
               onClick={() => toggleWatchlist(featured)}
               aria-pressed={hydrated ? saved : undefined}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-label-md text-white backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-white/20 active:scale-[0.98]"
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-6 py-3.5 text-label-md font-medium text-white backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-white/20 active:scale-[0.98]"
             >
               {hydrated && saved ? (
                 <>
-                  <BookmarkCheck className="size-4.5 text-primary" />
+                  <BookmarkCheck className="size-5 text-primary" />
                   In My List
                 </>
               ) : (
                 <>
-                  <Bookmark className="size-4.5" />
+                  <Bookmark className="size-5" />
                   Watchlist
                 </>
               )}

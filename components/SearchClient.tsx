@@ -84,7 +84,7 @@ export default function SearchClient() {
     <div className="mx-auto max-w-page px-4 pb-16 pt-28 sm:px-6 lg:pt-32">
       <h1 className="text-headline-lg text-white">Search</h1>
 
-      <div className="glass mt-6 flex items-center gap-3 rounded-full border border-white/15 px-5 py-3 transition-[border-color,box-shadow] focus-within:border-white focus-within:shadow-[0_0_18px_rgba(255,255,255,0.12)]">
+      <div className="glass mt-6 flex items-center gap-3 rounded-full border border-white/15 px-5 py-3 transition-[border-color,box-shadow] focus-within:border-primary focus-within:shadow-[0_0_18px_rgba(255,255,255,0.12)]">
         <Search className="size-5 shrink-0 text-muted" />
         <input
           autoFocus

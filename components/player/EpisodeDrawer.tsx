@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronDown, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 import PosterArt from "@/components/PosterArt";
+import Dropdown from "@/components/ui/Dropdown";
 import { useSettingsStore } from "@/lib/store/useSettingsStore";
 import type { Season } from "@/lib/types";
 import { cn, formatRuntime, truncate } from "@/lib/utils";
@@ -35,24 +36,17 @@ export default function EpisodeDrawer({
         <h2 className="text-headline-md text-white">Episodes</h2>
 
         {seasons.length > 0 && (
-          <div className="relative">
-            <select
-              value={activeSeason}
-              onChange={(e) => onSeasonChange(Number(e.target.value))}
-              aria-label="Select season"
-              className="appearance-none rounded-full border border-outline bg-surface-highest py-2 pl-4 pr-10 text-label-md text-white transition-colors hover:border-outline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            >
-              {seasons.map((season) => (
-                <option key={season.id} value={season.seasonNumber} className="bg-surface-highest">
-                  {season.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              aria-hidden
-              className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-muted"
-            />
-          </div>
+          <Dropdown
+            label="Select season"
+            value={activeSeason}
+            options={seasons.map((season) => ({
+              value: season.seasonNumber,
+              label: season.name || `Season ${season.seasonNumber}`,
+            }))}
+            onChange={(next) => onSeasonChange(Number(next))}
+            size="md"
+            align="right"
+          />
         )}
       </div>
 

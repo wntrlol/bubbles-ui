@@ -8,7 +8,7 @@ import { persist } from "zustand/middleware";
  * control cannot change behaviour, it does not belong in this store.
  */
 
-export type AccentId = "mint" | "amber" | "cyan" | "rose";
+export type AccentId = "white" | "mint" | "amber" | "cyan" | "rose";
 
 /**
  * "system" follows the OS `prefers-reduced-motion` setting. The other two
@@ -26,6 +26,7 @@ export interface Accent {
 
 /** Each accent is light enough to carry black label text at WCAG AA. */
 export const ACCENTS: Accent[] = [
+  { id: "white", label: "Classic", base: "#ffffff", hover: "#e0e0e0" },
   { id: "mint", label: "Zenox", base: "#4fe3b0", hover: "#9df2d4" },
   { id: "amber", label: "Projector", base: "#ffb340", hover: "#ffd08a" },
   { id: "cyan", label: "Cold Open", base: "#4fd6ff", hover: "#a5e9ff" },
@@ -63,7 +64,7 @@ interface SettingsState {
 }
 
 const DEFAULTS = {
-  accent: "mint" as AccentId,
+  accent: "white" as AccentId,
   cardTitles: "hover" as const,
   episodeView: "carousel" as const,
   motion: "system" as MotionPreference,
@@ -84,7 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "zenox.settings.v1",
-      version: 3,
+      version: 4,
       // v1 stored a `reduceMotion` boolean, which could only ever add reduction
       // on top of the OS setting. Carry a saved `true` across as an explicit
       // "reduced"; anything else falls back to following the system.
@@ -97,7 +98,11 @@ export const useSettingsStore = create<SettingsState>()(
         }
         // v3 retired the "lime" accent, which was lifted from another site.
         if ((next as { accent?: string }).accent === "lime") {
-          next = { ...next, accent: "mint" as AccentId };
+          next = { ...next, accent: "white" as AccentId };
+        }
+        // v4 added "white" as default; migrate old default "mint" to "white"
+        if (version < 4 && (next as { accent?: string }).accent === "mint") {
+          next = { ...next, accent: "white" as AccentId };
         }
         return next as SettingsState;
       },

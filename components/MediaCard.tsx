@@ -2,9 +2,8 @@
 
 import { Bookmark, BookmarkCheck, Play, Star } from "lucide-react";
 
-import Link from "next/link";
-
 import PosterArt from "@/components/PosterArt";
+import { useOverlay } from "@/components/overlay/OverlayProvider";
 import { useIsInWatchlist, useLibraryStore } from "@/lib/store/useLibraryStore";
 import { useHydrated } from "@/lib/store/usePlayerStore";
 import { useSettingsStore } from "@/lib/store/useSettingsStore";
@@ -28,10 +27,10 @@ export default function MediaCard({ media, priority, className, progress }: Medi
   const saved = useIsInWatchlist(media.id, media.mediaType);
   const toggleWatchlist = useLibraryStore((s) => s.toggleWatchlist);
   const cardTitles = useSettingsStore((s) => s.cardTitles);
+  const { openMedia } = useOverlay();
 
   const year = yearOf(media.releaseDate);
   const score = rating(media.voteAverage);
-  const href = `/watch/${media.mediaType}/${media.id}`;
   const alwaysOn = cardTitles === "always";
 
   return (
@@ -126,9 +125,14 @@ export default function MediaCard({ media, priority, className, progress }: Medi
           </div>
         )}
 
-        <Link href={href} className="absolute inset-0 z-10">
-          <span className="sr-only">{`Watch ${media.title}`}</span>
-        </Link>
+        <button
+          type="button"
+          onClick={() => openMedia(media.mediaType, media.id)}
+          className="absolute inset-0 z-10 cursor-pointer text-left"
+          aria-label={`View details for ${media.title}`}
+        >
+          <span className="sr-only">{`View details for ${media.title}`}</span>
+        </button>
       </div>
     </article>
   );

@@ -9,7 +9,7 @@ import { useEffect } from "react";
  * keeps the transition on the compositor instead of in React state.
  */
 export const AMBIENT_VAR = "--ambient-hue";
-const DEFAULT_HUE = 150;
+const DEFAULT_HUE = 0;
 
 export function useAmbient(hue: number | null | undefined) {
   useEffect(() => {

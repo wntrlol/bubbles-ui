@@ -209,23 +209,45 @@ interface RawDetails extends RawListItem {
     cast?: { id: number; name: string; character?: string; profile_path: string | null }[];
   };
   recommendations?: { results: RawListItem[] };
+  videos?: { results?: { key: string; site: string; type: string }[] };
+  images?: {
+    logos?: { file_path: string; iso_639_1?: string | null; vote_average?: number }[];
+  };
 }
 
 export async function getDetails(type: MediaType, id: string): Promise<MediaDetails> {
   const data = await request<RawDetails>(`/${type}/${id}`, {
-    append_to_response: "credits,recommendations",
+    append_to_response: "credits,recommendations,videos,images",
+    include_image_language: "en,null",
   });
   if (!data) return mockDetails(type, id);
 
   const summary = normalise(data, type);
+  const trailer =
+    data.videos?.results?.find(
+      (v) => v.site === "YouTube" && (v.type === "Trailer" || v.type === "Teaser"),
+    ) ?? data.videos?.results?.find((v) => v.site === "YouTube");
+
+  // Pick the best logo (prefer English logos sorted by vote_average, fallback to first)
+  const enLogos = data.images?.logos?.filter((l) => l.iso_639_1 === "en") ?? [];
+  const bestEnLogo = enLogos.length > 0
+    ? [...enLogos].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0))[0]
+    : null;
+  const bestFallbackLogo = data.images?.logos && data.images.logos.length > 0
+    ? [...data.images.logos].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0))[0]
+    : null;
+  const logoPath = (bestEnLogo ?? bestFallbackLogo)?.file_path ?? null;
+
   return {
     ...summary,
+    logoPath,
     genreIds: data.genres?.map((g) => g.id) ?? summary.genreIds,
     tagline: data.tagline || null,
     runtime: data.runtime ?? data.episode_run_time?.[0] ?? null,
     genres: data.genres ?? [],
     status: data.status ?? null,
     originalLanguage: data.original_language ?? null,
+    trailerKey: trailer?.key ?? null,
     cast:
       data.credits?.cast?.slice(0, 12).map((c) => ({
         id: c.id,
@@ -354,6 +376,24 @@ export async function getWatchProviders(type: MediaType): Promise<WatchProvider[
     ...p,
     logoPath: logoMap.get(p.id) ?? p.logoPath,
   }));
+}
+
+export async function getMediaLogo(type: MediaType, id: string | number): Promise<string | null> {
+  const data = await request<{
+    logos?: { file_path: string; iso_639_1?: string | null; vote_average?: number }[];
+  }>(`/${type}/${id}/images`, {
+    include_image_language: "en,null",
+  }, 86400);
+
+  const enLogos = data?.logos?.filter((l) => l.iso_639_1 === "en") ?? [];
+  const bestEnLogo = enLogos.length > 0
+    ? [...enLogos].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0))[0]
+    : null;
+  const bestFallbackLogo = data?.logos && data.logos.length > 0
+    ? [...data.logos].sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0))[0]
+    : null;
+
+  return (bestEnLogo ?? bestFallbackLogo)?.file_path ?? null;
 }
 
 export function getProviderById(id: number): WatchProvider | undefined {

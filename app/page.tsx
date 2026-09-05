@@ -42,7 +42,7 @@ export default async function HomePage() {
 
         <ForYouRail />
 
-        <MediaRow title="Trending Movies" items={trendingMovies} href="/trending" />
+        <MediaRow title="Trending Movies" items={trendingMovies} href="/trending" priority />
         <MediaRow title="Trending Series" items={trendingTv} href="/trending" />
 
         {GENRE_RAILS.map((rail, i) => (
@@ -51,11 +51,12 @@ export default async function HomePage() {
             title={rail.title}
             items={genreRails[i].results}
             href={`/${rail.type === "movie" ? "movies" : "tv"}?genre=${rail.id}`}
+            lazy
           />
         ))}
 
-        <MediaRow title="Popular Series" items={popularTv} href="/tv" />
-        <MediaRow title="Top Rated" items={topRatedMovies} href="/movies?sort=rating" />
+        <MediaRow title="Popular Series" items={popularTv} href="/tv" lazy />
+        <MediaRow title="Top Rated" items={topRatedMovies} href="/movies?sort=rating" lazy />
       </div>
     </>
   );
